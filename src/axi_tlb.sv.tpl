@@ -33,7 +33,7 @@ module axi_${tlb_name} #(
   /// Request type for configuration register interface
   parameter type cfg_req_t = logic,
   /// Response type for configuration register interface
-  parameter type cfg_req_t = logic
+  parameter type cfg_rsp_t = logic
 ) (
   /// Rising-edge clock of all ports
   input  logic        clk_i,
@@ -50,13 +50,13 @@ module axi_${tlb_name} #(
   /// Main master port response
   input  axi_resp_t   mst_resp_i,
   /// Configuration port request
-  output cfg_req_t    cfg_req_i,
+  input  cfg_req_t    cfg_req_i,
   /// Configuration port response
-  output cfg_req_t    cfg_rsp_o
+  output cfg_rsp_t    cfg_rsp_o
 );
 
-  typedef logic [$bits(slv_req_t.aw.addr)-12-1:0] oup_page_t;
-  typedef logic [$bits(slv_req_t.aw.addr)-12-1:0] inp_page_t;
+  typedef logic [$bits(mst_req_o.aw.addr)-12-1:0] oup_page_t;
+  typedef logic [$bits(slv_req_i.aw.addr)-12-1:0] inp_page_t;
 
   `AXI_TLB_TYPEDEF_ALL(tlb, oup_page_t, inp_page_t)
 
@@ -65,7 +65,7 @@ module axi_${tlb_name} #(
   axi_${tlb_name}_reg_pkg::axi_${tlb_name}_reg2hw_t reg2hw;
 
   axi_${tlb_name}_reg_top #(
-    .reg_req_t  ( cfg_reg_t ),
+    .reg_req_t  ( cfg_req_t ),
     .reg_rsp_t  ( cfg_rsp_t )
   ) i_axi_${tlb_name}_reg_top (
     .clk_i,
@@ -80,7 +80,7 @@ module axi_${tlb_name} #(
   tlb_entry_t [7:0] entries;
 
   % for j in range(num_entries):
-  assign entries_o[${j}] = '{
+  assign entries[${j}] = '{
     first:    {reg2hw.${tlb_name}_entry_${j}_pagein_first_high.q,  reg2hw.${tlb_name}_entry_${j}_pagein_first_low.q},
     last:     {reg2hw.${tlb_name}_entry_${j}_pagein_last_high.q,   reg2hw.${tlb_name}_entry_${j}_pagein_last_low.q},
     base:     {reg2hw.${tlb_name}_entry_${j}_pageout_high.q,       reg2hw.${tlb_name}_entry_${j}_pageout_low.q},
@@ -88,8 +88,6 @@ module axi_${tlb_name} #(
     read_only: reg2hw.${tlb_name}_entry_${j}_flags.read_only.q
   };
   % endfor
-
-  logic enable = reg2hw.${tlb_name}_enable;
 
   // Underlying TLB
   axi_tlb_noreg #(
@@ -114,7 +112,7 @@ module axi_${tlb_name} #(
     .mst_req_o,
     .mst_resp_i,
     .entries_i    ( entries ),
-    .bypass_i     ( ~enable )
+    .bypass_i     ( ~reg2hw.${tlb_name}_enable.q )
   );
 
 endmodule

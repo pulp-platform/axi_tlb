@@ -33,7 +33,7 @@ module axi_tlb #(
   /// Request type for configuration register interface
   parameter type cfg_req_t = logic,
   /// Response type for configuration register interface
-  parameter type cfg_req_t = logic
+  parameter type cfg_rsp_t = logic
 ) (
   /// Rising-edge clock of all ports
   input  logic        clk_i,
@@ -50,13 +50,13 @@ module axi_tlb #(
   /// Main master port response
   input  axi_resp_t   mst_resp_i,
   /// Configuration port request
-  output cfg_req_t    cfg_req_i,
+  input  cfg_req_t    cfg_req_i,
   /// Configuration port response
-  output cfg_req_t    cfg_rsp_o
+  output cfg_rsp_t    cfg_rsp_o
 );
 
-  typedef logic [$bits(slv_req_t.aw.addr)-12-1:0] oup_page_t;
-  typedef logic [$bits(slv_req_t.aw.addr)-12-1:0] inp_page_t;
+  typedef logic [$bits(mst_req_o.aw.addr)-12-1:0] oup_page_t;
+  typedef logic [$bits(slv_req_i.aw.addr)-12-1:0] inp_page_t;
 
   `AXI_TLB_TYPEDEF_ALL(tlb, oup_page_t, inp_page_t)
 
@@ -65,7 +65,7 @@ module axi_tlb #(
   axi_tlb_reg_pkg::axi_tlb_reg2hw_t reg2hw;
 
   axi_tlb_reg_top #(
-    .reg_req_t  ( cfg_reg_t ),
+    .reg_req_t  ( cfg_req_t ),
     .reg_rsp_t  ( cfg_rsp_t )
   ) i_axi_tlb_reg_top (
     .clk_i,
@@ -79,64 +79,62 @@ module axi_tlb #(
   // Map to configuration inputs
   tlb_entry_t [7:0] entries;
 
-  assign entries_o[0] = '{
+  assign entries[0] = '{
     first:    {reg2hw.tlb_entry_0_pagein_first_high.q,  reg2hw.tlb_entry_0_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_0_pagein_last_high.q,   reg2hw.tlb_entry_0_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_0_pageout_high.q,       reg2hw.tlb_entry_0_pageout_low.q},
     valid:    reg2hw.tlb_entry_0_flags.valid.q,
     read_only: reg2hw.tlb_entry_0_flags.read_only.q
   };
-  assign entries_o[1] = '{
+  assign entries[1] = '{
     first:    {reg2hw.tlb_entry_1_pagein_first_high.q,  reg2hw.tlb_entry_1_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_1_pagein_last_high.q,   reg2hw.tlb_entry_1_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_1_pageout_high.q,       reg2hw.tlb_entry_1_pageout_low.q},
     valid:    reg2hw.tlb_entry_1_flags.valid.q,
     read_only: reg2hw.tlb_entry_1_flags.read_only.q
   };
-  assign entries_o[2] = '{
+  assign entries[2] = '{
     first:    {reg2hw.tlb_entry_2_pagein_first_high.q,  reg2hw.tlb_entry_2_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_2_pagein_last_high.q,   reg2hw.tlb_entry_2_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_2_pageout_high.q,       reg2hw.tlb_entry_2_pageout_low.q},
     valid:    reg2hw.tlb_entry_2_flags.valid.q,
     read_only: reg2hw.tlb_entry_2_flags.read_only.q
   };
-  assign entries_o[3] = '{
+  assign entries[3] = '{
     first:    {reg2hw.tlb_entry_3_pagein_first_high.q,  reg2hw.tlb_entry_3_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_3_pagein_last_high.q,   reg2hw.tlb_entry_3_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_3_pageout_high.q,       reg2hw.tlb_entry_3_pageout_low.q},
     valid:    reg2hw.tlb_entry_3_flags.valid.q,
     read_only: reg2hw.tlb_entry_3_flags.read_only.q
   };
-  assign entries_o[4] = '{
+  assign entries[4] = '{
     first:    {reg2hw.tlb_entry_4_pagein_first_high.q,  reg2hw.tlb_entry_4_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_4_pagein_last_high.q,   reg2hw.tlb_entry_4_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_4_pageout_high.q,       reg2hw.tlb_entry_4_pageout_low.q},
     valid:    reg2hw.tlb_entry_4_flags.valid.q,
     read_only: reg2hw.tlb_entry_4_flags.read_only.q
   };
-  assign entries_o[5] = '{
+  assign entries[5] = '{
     first:    {reg2hw.tlb_entry_5_pagein_first_high.q,  reg2hw.tlb_entry_5_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_5_pagein_last_high.q,   reg2hw.tlb_entry_5_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_5_pageout_high.q,       reg2hw.tlb_entry_5_pageout_low.q},
     valid:    reg2hw.tlb_entry_5_flags.valid.q,
     read_only: reg2hw.tlb_entry_5_flags.read_only.q
   };
-  assign entries_o[6] = '{
+  assign entries[6] = '{
     first:    {reg2hw.tlb_entry_6_pagein_first_high.q,  reg2hw.tlb_entry_6_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_6_pagein_last_high.q,   reg2hw.tlb_entry_6_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_6_pageout_high.q,       reg2hw.tlb_entry_6_pageout_low.q},
     valid:    reg2hw.tlb_entry_6_flags.valid.q,
     read_only: reg2hw.tlb_entry_6_flags.read_only.q
   };
-  assign entries_o[7] = '{
+  assign entries[7] = '{
     first:    {reg2hw.tlb_entry_7_pagein_first_high.q,  reg2hw.tlb_entry_7_pagein_first_low.q},
     last:     {reg2hw.tlb_entry_7_pagein_last_high.q,   reg2hw.tlb_entry_7_pagein_last_low.q},
     base:     {reg2hw.tlb_entry_7_pageout_high.q,       reg2hw.tlb_entry_7_pageout_low.q},
     valid:    reg2hw.tlb_entry_7_flags.valid.q,
     read_only: reg2hw.tlb_entry_7_flags.read_only.q
   };
-
-  logic enable = reg2hw.tlb_enable;
 
   // Underlying TLB
   axi_tlb_noreg #(
@@ -161,7 +159,7 @@ module axi_tlb #(
     .mst_req_o,
     .mst_resp_i,
     .entries_i    ( entries ),
-    .bypass_i     ( ~enable )
+    .bypass_i     ( ~reg2hw.tlb_enable.q )
   );
 
 endmodule

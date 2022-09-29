@@ -8,7 +8,7 @@ all:
 
 clean:
 	rm -rf .bender
-	rm -f Bender.lock
+	rm -f bender Bender.lock
 
 bender:
 	curl --proto '=https' --tlsv1.2 -sSf https://pulp-platform.github.io/bender/init | bash -s -- 0.25.3
@@ -32,3 +32,16 @@ check_generated:
 	$(CHECK_CLEAN)
 
 check: check_generated
+
+# Simulation using QuestaSim
+
+clean: clean_vsim
+
+clean_vsim:
+	rm -rf test/work
+	rm -f transcript *.wlf wlf*
+	rm -f test/*.tcl
+
+vsim: clean_vsim bender
+	cd test && ./compile.vsim.sh
+	cd test && ./run.vsim.sh

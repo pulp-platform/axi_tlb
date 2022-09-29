@@ -28,3 +28,7 @@ sources:
   - src/axi_tlb_noreg.sv
   # Level 3
   - src/axi_tlb.sv
+  - target: test
+    files:
+    # Level 0
+    - test/tb_axi_tlb.sv
